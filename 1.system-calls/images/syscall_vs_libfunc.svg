@@ -1,0 +1,62 @@
+<svg width="100%" viewBox="0 0 680 420" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- Title -->
+<text font-size="15" font-weight="500" x="340" y="28" text-anchor="middle" fill="#2C2C2A" font-family="sans-serif">System Call vs Library Function</text>
+
+<!-- USER SPACE -->
+<rect x="20" y="40" width="640" height="160" rx="12" fill="#E6F1FB" stroke="#378ADD" stroke-width="1" opacity="0.5"/>
+<text font-size="12" font-weight="500" x="36" y="60" fill="#185FA5" font-family="sans-serif">User space</text>
+
+<!-- Library functions -->
+<rect x="40" y="70" width="580" height="60" rx="8" fill="#B5D4F4" stroke="#378ADD" stroke-width="0.5"/>
+<text font-size="12" font-weight="500" x="330" y="91" text-anchor="middle" fill="#0C447C" font-family="sans-serif">Library Functions — chạy hoàn toàn trong user space</text>
+<text font-size="11" x="330" y="115" text-anchor="middle" fill="#185FA5" font-family="sans-serif">printf()   fread()   malloc()   strlen()   strcpy()   fopen()</text>
+
+<!-- Arrows — some call syscall, some don't -->
+<line x1="150" y1="130" x2="150" y2="168" stroke="#378ADD" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow)"/>
+<text font-size="10" x="150" y="155" text-anchor="middle" fill="#185FA5" font-family="sans-serif">gọi syscall</text>
+
+<line x1="400" y1="130" x2="400" y2="168" stroke="#D3D1C7" stroke-width="1" stroke-dasharray="3 3"/>
+<text font-size="10" x="450" y="155" text-anchor="middle" fill="#888780" font-family="sans-serif">không gọi syscall</text>
+<text font-size="10" x="450" y="167" text-anchor="middle" fill="#888780" font-family="sans-serif">(strlen, strcpy...)</text>
+
+<!-- Mode switch line -->
+<line x1="20" y1="210" x2="660" y2="210" stroke="#E24B4A" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text font-size="11" font-weight="500" x="340" y="225" text-anchor="middle" fill="#A32D2D" font-family="sans-serif">── user mode / kernel mode boundary ──</text>
+
+<!-- KERNEL SPACE -->
+<rect x="20" y="235" width="640" height="100" rx="12" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1" opacity="0.5"/>
+<text font-size="12" font-weight="500" x="36" y="255" fill="#0F6E56" font-family="sans-serif">Kernel space</text>
+
+<!-- System calls -->
+<rect x="40" y="262" width="580" height="55" rx="8" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.5"/>
+<text font-size="12" font-weight="500" x="330" y="283" text-anchor="middle" fill="#04342C" font-family="sans-serif">System Calls — entry point vào kernel</text>
+<text font-size="11" x="330" y="305" text-anchor="middle" fill="#085041" font-family="sans-serif">write()   read()   open()   close()   fork()   mmap()   stat()</text>
+
+<!-- Bottom comparison table -->
+<rect x="20" y="348" width="640" height="55" rx="8" fill="none" stroke="#888780" stroke-width="0.5"/>
+
+<!-- Headers -->
+<rect x="20" y="348" width="640" height="22" rx="8" fill="#D3D1C7" stroke="#888780" stroke-width="0.5"/>
+<text font-size="11" font-weight="500" x="130" y="363" text-anchor="middle" fill="#2C2C2A" font-family="sans-serif">Đặc điểm</text>
+<text font-size="11" font-weight="500" x="320" y="363" text-anchor="middle" fill="#185FA5" font-family="sans-serif">Library Function</text>
+<text font-size="11" font-weight="500" x="530" y="363" text-anchor="middle" fill="#0F6E56" font-family="sans-serif">System Call</text>
+
+<!-- Row 1 -->
+<text font-size="10" x="40" y="382" fill="#444441" font-family="sans-serif">Chạy ở / Tốc độ / Ví dụ</text>
+<text font-size="10" x="240" y="382" fill="#185FA5" font-family="sans-serif">User space / Nhanh / printf(), malloc()</text>
+<text font-size="10" x="450" y="382" fill="#0F6E56" font-family="sans-serif">Kernel space / ~3x chậm hơn / write(), read()</text>
+
+<!-- Dividers -->
+<line x1="220" y1="348" x2="220" y2="403" stroke="#888780" stroke-width="0.5"/>
+<line x1="420" y1="348" x2="420" y2="403" stroke="#888780" stroke-width="0.5"/>
+
+<!-- Example flow -->
+<text font-size="11" font-weight="500" x="340" y="408" text-anchor="middle" fill="#534AB7" font-family="sans-serif">printf("Hello") → [stdio buffer] → write(1,...) → [kernel buffer] → terminal</text>
+
+</svg>

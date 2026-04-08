@@ -41,69 +41,7 @@ CPU có 2 modes hoàn toàn tách biệt:
 
 ## 2. Flow của System Call (x86)
 
-<svg width="100%" viewBox="0 0 680 520" xmlns="http://www.w3.org/2000/svg">
-<defs>
-  <marker id="arr1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-  </marker>
-</defs>
-<!-- USER SPACE -->
-<rect x="20" y="20" width="640" height="180" rx="12" fill="#E6F1FB" stroke="#378ADD" stroke-width="1" stroke-dasharray="6 3" opacity="0.6"/>
-<text font-size="12" font-weight="500" x="36" y="40" fill="#185FA5" font-family="sans-serif">User space</text>
-<!-- User program -->
-<rect x="40" y="50" width="180" height="130" rx="8" fill="#B5D4F4" stroke="#378ADD" stroke-width="0.5"/>
-<text font-size="13" font-weight="500" x="130" y="73" text-anchor="middle" fill="#0C447C" font-family="sans-serif">User program</text>
-<text font-size="11" x="130" y="95" text-anchor="middle" fill="#185FA5" font-family="sans-serif">write(1, "Hi", 2)</text>
-<text font-size="10" x="130" y="115" text-anchor="middle" fill="#378ADD" font-family="sans-serif">gọi hàm bình thường</text>
-<!-- glibc wrapper -->
-<rect x="280" y="50" width="220" height="130" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.5"/>
-<text font-size="13" font-weight="500" x="390" y="73" text-anchor="middle" fill="#26215C" font-family="sans-serif">glibc wrapper</text>
-<text font-size="11" x="390" y="97" text-anchor="middle" fill="#534AB7" font-family="sans-serif">① %eax = 4 (write)</text>
-<text font-size="11" x="390" y="115" text-anchor="middle" fill="#534AB7" font-family="sans-serif">② args → registers</text>
-<text font-size="11" x="390" y="133" text-anchor="middle" fill="#534AB7" font-family="sans-serif">③ int 0x80</text>
-<text font-size="10" x="390" y="168" text-anchor="middle" fill="#7F77DD" font-family="sans-serif">return kết quả cho user</text>
-<!-- Arrows user ↔ glibc -->
-<line x1="220" y1="108" x2="278" y2="108" stroke="#378ADD" stroke-width="1.5" marker-end="url(#arr1)"/>
-<text font-size="10" x="249" y="101" text-anchor="middle" fill="#185FA5" font-family="sans-serif">call</text>
-<path d="M280 148 L250 148 L250 128 L220 128" fill="none" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#arr1)"/>
-<text font-size="10" x="235" y="143" text-anchor="middle" fill="#0F6E56" font-family="sans-serif">return</text>
-<!-- Mode switch -->
-<line x1="20" y1="210" x2="660" y2="210" stroke="#888780" stroke-width="0.8" stroke-dasharray="5 3"/>
-<text font-size="11" x="340" y="226" text-anchor="middle" fill="#888780" font-family="sans-serif">── CPU switches to kernel mode (int 0x80 → IDT[128]) ──</text>
-<line x1="390" y1="180" x2="390" y2="240" stroke="#BA7517" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr1)"/>
-<!-- KERNEL SPACE -->
-<rect x="20" y="240" width="640" height="260" rx="12" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1" stroke-dasharray="6 3" opacity="0.6"/>
-<text font-size="12" font-weight="500" x="36" y="260" fill="#0F6E56" font-family="sans-serif">Kernel space</text>
-<!-- system_call() handler -->
-<rect x="40" y="272" width="200" height="100" rx="8" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.5"/>
-<text font-size="13" font-weight="500" x="140" y="293" text-anchor="middle" fill="#04342C" font-family="sans-serif">system_call()</text>
-<text font-size="11" x="140" y="313" text-anchor="middle" fill="#085041" font-family="sans-serif">④ lưu registers</text>
-<text font-size="11" x="140" y="331" text-anchor="middle" fill="#085041" font-family="sans-serif">⑤ kiểm tra eax</text>
-<text font-size="11" x="140" y="349" text-anchor="middle" fill="#085041" font-family="sans-serif">⑥ tra sys_call_table</text>
-<!-- sys_call_table -->
-<rect x="298" y="272" width="160" height="100" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.5"/>
-<text font-size="12" font-weight="500" x="378" y="293" text-anchor="middle" fill="#633806" font-family="sans-serif">sys_call_table[]</text>
-<text font-size="11" x="378" y="313" text-anchor="middle" fill="#854F0B" font-family="sans-serif">[0] → sys_read</text>
-<text font-size="11" x="378" y="331" text-anchor="middle" fill="#854F0B" font-family="sans-serif">[1] → sys_write</text>
-<text font-size="11" x="378" y="349" text-anchor="middle" fill="#D85A30" font-family="sans-serif">[4] → sys_write ←</text>
-<!-- sys_write -->
-<rect x="518" y="272" width="122" height="100" rx="8" fill="#FAECE7" stroke="#D85A30" stroke-width="0.5"/>
-<text font-size="12" font-weight="500" x="579" y="293" text-anchor="middle" fill="#4A1B0C" font-family="sans-serif">sys_write()</text>
-<text font-size="11" x="579" y="315" text-anchor="middle" fill="#993C1D" font-family="sans-serif">thực thi!</text>
-<text font-size="11" x="579" y="333" text-anchor="middle" fill="#993C1D" font-family="sans-serif">ghi vào</text>
-<text font-size="11" x="579" y="351" text-anchor="middle" fill="#993C1D" font-family="sans-serif">buffer cache</text>
-<!-- Arrows inside kernel -->
-<line x1="240" y1="322" x2="296" y2="322" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#arr1)"/>
-<line x1="458" y1="322" x2="516" y2="322" stroke="#BA7517" stroke-width="1.5" marker-end="url(#arr1)"/>
-<!-- Return path -->
-<path d="M579 372 L579 415 L140 415 L140 374" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr1)"/>
-<text font-size="10" x="360" y="432" text-anchor="middle" fill="#534AB7" font-family="sans-serif">return value → glibc wrapper → user program</text>
-<!-- IDT note -->
-<rect x="40" y="444" width="200" height="44" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
-<text font-size="11" font-weight="500" x="140" y="462" text-anchor="middle" fill="#2C2C2A" font-family="sans-serif">IDT[128] = syscall entry</text>
-<text font-size="10" x="140" y="480" text-anchor="middle" fill="#5F5E5A" font-family="sans-serif">0x80 = 128 → system_call() address</text>
-</svg>
-
+![](./images/syscall_flow.svg)
 ### 2.1 Tại sao dùng `int 0x80` (128)?
 
 ```
@@ -265,49 +203,7 @@ write(fd, buf, 1000000);
 ---
 
 ## 5. System Call vs Library Function
-
-<svg width="100%" viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg">
-<defs>
-  <marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-  </marker>
-</defs>
-<!-- USER SPACE -->
-<rect x="20" y="20" width="640" height="150" rx="12" fill="#E6F1FB" stroke="#378ADD" stroke-width="1" opacity="0.6"/>
-<text font-size="12" font-weight="500" x="36" y="40" fill="#185FA5" font-family="sans-serif">User space</text>
-<!-- Library functions -->
-<rect x="40" y="50" width="580" height="55" rx="8" fill="#B5D4F4" stroke="#378ADD" stroke-width="0.5"/>
-<text font-size="12" font-weight="500" x="330" y="71" text-anchor="middle" fill="#0C447C" font-family="sans-serif">Library Functions — chạy hoàn toàn trong user space</text>
-<text font-size="11" x="330" y="93" text-anchor="middle" fill="#185FA5" font-family="sans-serif">printf()     fread()     malloc()     strlen()     strcpy()     fopen()</text>
-<!-- Arrows down -->
-<line x1="150" y1="105" x2="150" y2="178" stroke="#378ADD" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr2)"/>
-<text font-size="10" x="190" y="145" fill="#185FA5" font-family="sans-serif">gọi syscall</text>
-<text font-size="10" x="190" y="158" fill="#185FA5" font-family="sans-serif">(printf→write)</text>
-<line x1="450" y1="105" x2="450" y2="140" stroke="#D3D1C7" stroke-width="1" stroke-dasharray="3 3"/>
-<text font-size="10" x="480" y="135" fill="#888780" font-family="sans-serif">không gọi syscall</text>
-<text font-size="10" x="480" y="148" fill="#888780" font-family="sans-serif">(strlen, strcpy...)</text>
-<!-- Boundary line -->
-<line x1="20" y1="182" x2="660" y2="182" stroke="#E24B4A" stroke-width="1.5" stroke-dasharray="6 3"/>
-<text font-size="11" font-weight="500" x="340" y="198" text-anchor="middle" fill="#A32D2D" font-family="sans-serif">── user mode / kernel mode boundary ──</text>
-<!-- KERNEL SPACE -->
-<rect x="20" y="208" width="640" height="90" rx="12" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1" opacity="0.6"/>
-<text font-size="12" font-weight="500" x="36" y="228" fill="#0F6E56" font-family="sans-serif">Kernel space</text>
-<!-- System calls -->
-<rect x="40" y="235" width="580" height="50" rx="8" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.5"/>
-<text font-size="12" font-weight="500" x="330" y="256" text-anchor="middle" fill="#04342C" font-family="sans-serif">System Calls — entry point vào kernel</text>
-<text font-size="11" x="330" y="275" text-anchor="middle" fill="#085041" font-family="sans-serif">write()     read()     open()     close()     fork()     mmap()     stat()</text>
-<!-- Comparison table -->
-<rect x="20" y="318" width="640" height="50" rx="8" fill="none" stroke="#888780" stroke-width="0.5"/>
-<rect x="20" y="318" width="640" height="22" rx="8" fill="#D3D1C7" stroke="#888780" stroke-width="0.5"/>
-<text font-size="11" font-weight="500" x="130" y="333" text-anchor="middle" fill="#2C2C2A" font-family="sans-serif">Đặc điểm</text>
-<text font-size="11" font-weight="500" x="340" y="333" text-anchor="middle" fill="#185FA5" font-family="sans-serif">Library Function</text>
-<text font-size="11" font-weight="500" x="560" y="333" text-anchor="middle" fill="#0F6E56" font-family="sans-serif">System Call</text>
-<text font-size="10" x="40" y="355" fill="#444441" font-family="sans-serif">Chạy ở / Tốc độ</text>
-<text font-size="10" x="220" y="355" fill="#185FA5" font-family="sans-serif">User space / Nhanh</text>
-<text font-size="10" x="430" y="355" fill="#0F6E56" font-family="sans-serif">Kernel space / ~3x chậm hơn</text>
-<line x1="210" y1="318" x2="210" y2="368" stroke="#888780" stroke-width="0.5"/>
-<line x1="420" y1="318" x2="420" y2="368" stroke="#888780" stroke-width="0.5"/>
-</svg>
+![](./images/syscall_vs_libfunc.svg)
 
 **Ví dụ liên kết:**
 
