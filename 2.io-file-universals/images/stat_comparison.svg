@@ -1,0 +1,153 @@
+<svg width="100%" viewBox="0 0 680 580" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- Title -->
+<text font-size="16" font-weight="500" x="340" y="28" text-anchor="middle" fill="#2C2C2A" font-family="sans-serif">stat() vs lstat() vs fstat()</text>
+
+<!-- Shared file system setup -->
+<text font-size="12" x="340" y="52" text-anchor="middle" fill="#888780" font-family="sans-serif">Setup: /dev/serial0 (symlink) → /dev/ttyAMA0 (UART device)</text>
+
+<!-- ===== STAT() ===== -->
+<rect x="20" y="65" width="200" height="220" rx="10" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>
+<text font-size="14" font-weight="500" x="120" y="88" text-anchor="middle" fill="#0C447C" font-family="sans-serif">stat()</text>
+<text font-size="11" x="120" y="106" text-anchor="middle" fill="#185FA5" font-family="sans-serif">dùng pathname</text>
+<text font-size="11" x="120" y="122" text-anchor="middle" fill="#185FA5" font-family="sans-serif">đi XUYÊN qua symlink</text>
+
+<!-- stat() flow -->
+<rect x="35" y="134" width="170" height="32" rx="6" fill="#B5D4F4" stroke="#378ADD" stroke-width="0.5"/>
+<text font-size="11" x="120" y="148" text-anchor="middle" fill="#042C53" font-family="sans-serif">pathname: "/dev/serial0"</text>
+<text font-size="10" x="120" y="161" text-anchor="middle" fill="#185FA5" font-family="sans-serif">(symlink)</text>
+
+<line x1="120" y1="166" x2="120" y2="184" stroke="#378ADD" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text font-size="10" x="150" y="178" fill="#378ADD" font-family="sans-serif">follow!</text>
+
+<rect x="35" y="186" width="170" height="32" rx="6" fill="#378ADD" stroke="#185FA5" stroke-width="0.5"/>
+<text font-size="11" x="120" y="200" text-anchor="middle" fill="#E6F1FB" font-family="sans-serif">→ /dev/ttyAMA0</text>
+<text font-size="10" x="120" y="213" text-anchor="middle" fill="#B5D4F4" font-family="sans-serif">(file đích)</text>
+
+<line x1="120" y1="218" x2="120" y2="236" stroke="#378ADD" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<rect x="35" y="238" width="170" height="32" rx="6" fill="#0C447C" stroke="#185FA5" stroke-width="0.5"/>
+<text font-size="11" x="120" y="252" text-anchor="middle" fill="#E6F1FB" font-family="sans-serif">inode của ttyAMA0</text>
+<text font-size="10" x="120" y="265" text-anchor="middle" fill="#B5D4F4" font-family="sans-serif">S_ISCHR() = true ✓</text>
+
+<!-- stat() result -->
+<rect x="35" y="278" width="170" height="0" rx="4"/>
+<text font-size="11" font-weight="500" x="120" y="278" text-anchor="middle" fill="#0C447C" font-family="sans-serif">Kết quả:</text>
+<text font-size="10" x="35" y="295" fill="#185FA5" font-family="sans-serif">• S_ISCHR() = true</text>
+<text font-size="10" x="35" y="310" fill="#185FA5" font-family="sans-serif">• st_size = 0 (device)</text>
+
+<!-- ===== LSTAT() ===== -->
+<rect x="240" y="65" width="200" height="220" rx="10" fill="#EEEDFE" stroke="#7F77DD" stroke-width="1"/>
+<text font-size="14" font-weight="500" x="340" y="88" text-anchor="middle" fill="#26215C" font-family="sans-serif">lstat()</text>
+<text font-size="11" x="340" y="106" text-anchor="middle" fill="#534AB7" font-family="sans-serif">dùng pathname</text>
+<text font-size="11" x="340" y="122" text-anchor="middle" fill="#534AB7" font-family="sans-serif">DỪNG tại symlink</text>
+
+<!-- lstat() flow -->
+<rect x="255" y="134" width="170" height="32" rx="6" fill="#AFA9EC" stroke="#7F77DD" stroke-width="0.5"/>
+<text font-size="11" x="340" y="148" text-anchor="middle" fill="#26215C" font-family="sans-serif">pathname: "/dev/serial0"</text>
+<text font-size="10" x="340" y="161" text-anchor="middle" fill="#534AB7" font-family="sans-serif">(symlink)</text>
+
+<line x1="340" y1="166" x2="340" y2="184" stroke="#7F77DD" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text font-size="10" x="375" y="178" fill="#E24B4A" font-family="sans-serif">STOP!</text>
+
+<rect x="255" y="186" width="170" height="32" rx="6" fill="#7F77DD" stroke="#534AB7" stroke-width="0.5"/>
+<text font-size="11" x="340" y="200" text-anchor="middle" fill="#EEEDFE" font-family="sans-serif">inode của serial0</text>
+<text font-size="10" x="340" y="213" text-anchor="middle" fill="#CECBF6" font-family="sans-serif">(symlink itself)</text>
+
+<!-- lstat() spacer -->
+<rect x="255" y="238" width="170" height="32" rx="6" fill="#3C3489" stroke="#534AB7" stroke-width="0.5"/>
+<text font-size="11" x="340" y="252" text-anchor="middle" fill="#EEEDFE" font-family="sans-serif">info của symlink</text>
+<text font-size="10" x="340" y="265" text-anchor="middle" fill="#CECBF6" font-family="sans-serif">S_ISLNK() = true ✓</text>
+
+<!-- lstat() result -->
+<text font-size="11" font-weight="500" x="340" y="278" text-anchor="middle" fill="#26215C" font-family="sans-serif">Kết quả:</text>
+<text font-size="10" x="255" y="295" fill="#534AB7" font-family="sans-serif">• S_ISLNK() = true</text>
+<text font-size="10" x="255" y="310" fill="#534AB7" font-family="sans-serif">• st_size = length of path</text>
+
+<!-- ===== FSTAT() ===== -->
+<rect x="460" y="65" width="200" height="220" rx="10" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1"/>
+<text font-size="14" font-weight="500" x="560" y="88" text-anchor="middle" fill="#04342C" font-family="sans-serif">fstat()</text>
+<text font-size="11" x="560" y="106" text-anchor="middle" fill="#0F6E56" font-family="sans-serif">dùng fd</text>
+<text font-size="11" x="560" y="122" text-anchor="middle" fill="#0F6E56" font-family="sans-serif">không cần pathname</text>
+
+<!-- fstat() flow -->
+<rect x="475" y="134" width="170" height="32" rx="6" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.5"/>
+<text font-size="11" x="560" y="148" text-anchor="middle" fill="#04342C" font-family="sans-serif">fd = open(...)</text>
+<text font-size="10" x="560" y="161" text-anchor="middle" fill="#0F6E56" font-family="sans-serif">(đã resolve pathname)</text>
+
+<line x1="560" y1="166" x2="560" y2="184" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text font-size="10" x="595" y="178" fill="#1D9E75" font-family="sans-serif">trực tiếp!</text>
+
+<rect x="475" y="186" width="170" height="32" rx="6" fill="#1D9E75" stroke="#0F6E56" stroke-width="0.5"/>
+<text font-size="11" x="560" y="200" text-anchor="middle" fill="#E1F5EE" font-family="sans-serif">inode từ fd table</text>
+<text font-size="10" x="560" y="213" text-anchor="middle" fill="#9FE1CB" font-family="sans-serif">(không resolve lại)</text>
+
+<rect x="475" y="238" width="170" height="32" rx="6" fill="#085041" stroke="#0F6E56" stroke-width="0.5"/>
+<text font-size="11" x="560" y="252" text-anchor="middle" fill="#E1F5EE" font-family="sans-serif">info của file đang mở</text>
+<text font-size="10" x="560" y="265" text-anchor="middle" fill="#9FE1CB" font-family="sans-serif">nhanh hơn stat()!</text>
+
+<!-- fstat() result -->
+<text font-size="11" font-weight="500" x="560" y="278" text-anchor="middle" fill="#04342C" font-family="sans-serif">Kết quả:</text>
+<text font-size="10" x="475" y="295" fill="#0F6E56" font-family="sans-serif">• Info của file đang mở</text>
+<text font-size="10" x="475" y="310" fill="#0F6E56" font-family="sans-serif">• Không cần resolve path</text>
+
+<!-- ===== COMPARISON TABLE ===== -->
+<rect x="20" y="330" width="640" height="230" rx="10" fill="none" stroke="#888780" stroke-width="0.5"/>
+<text font-size="13" font-weight="500" x="340" y="352" text-anchor="middle" fill="#2C2C2A" font-family="sans-serif">So sánh tổng hợp</text>
+
+<!-- Table header -->
+<rect x="20" y="358" width="640" height="30" rx="0" fill="#D3D1C7" stroke="#888780" stroke-width="0.5"/>
+<text font-size="11" font-weight="500" x="120" y="377" text-anchor="middle" fill="#2C2C2A" font-family="sans-serif">Tiêu chí</text>
+<text font-size="11" font-weight="500" x="290" y="377" text-anchor="middle" fill="#0C447C" font-family="sans-serif">stat()</text>
+<text font-size="11" font-weight="500" x="430" y="377" text-anchor="middle" fill="#26215C" font-family="sans-serif">lstat()</text>
+<text font-size="11" font-weight="500" x="570" y="377" text-anchor="middle" fill="#04342C" font-family="sans-serif">fstat()</text>
+
+<!-- Row 1 -->
+<rect x="20" y="388" width="640" height="30" rx="0" fill="#F1EFE8" stroke="#888780" stroke-width="0.3"/>
+<text font-size="11" x="35" y="407" fill="#444441" font-family="sans-serif">Cách chỉ định file</text>
+<text font-size="11" x="290" y="407" text-anchor="middle" fill="#185FA5" font-family="sans-serif">pathname</text>
+<text font-size="11" x="430" y="407" text-anchor="middle" fill="#534AB7" font-family="sans-serif">pathname</text>
+<text font-size="11" x="570" y="407" text-anchor="middle" fill="#0F6E56" font-family="sans-serif">fd</text>
+
+<!-- Row 2 -->
+<rect x="20" y="418" width="640" height="30" rx="0" fill="#ffffff" stroke="#888780" stroke-width="0.3"/>
+<text font-size="11" x="35" y="437" fill="#444441" font-family="sans-serif">Xử lý symlink</text>
+<text font-size="11" x="290" y="437" text-anchor="middle" fill="#185FA5" font-family="sans-serif">Follow (đi xuyên)</text>
+<text font-size="11" x="430" y="437" text-anchor="middle" fill="#534AB7" font-family="sans-serif">Dừng tại symlink</text>
+<text font-size="11" x="570" y="437" text-anchor="middle" fill="#0F6E56" font-family="sans-serif">Không liên quan</text>
+
+<!-- Row 3 -->
+<rect x="20" y="448" width="640" height="30" rx="0" fill="#F1EFE8" stroke="#888780" stroke-width="0.3"/>
+<text font-size="11" x="35" y="467" fill="#444441" font-family="sans-serif">Tốc độ</text>
+<text font-size="11" x="290" y="467" text-anchor="middle" fill="#185FA5" font-family="sans-serif">Chậm (resolve path)</text>
+<text font-size="11" x="430" y="467" text-anchor="middle" fill="#534AB7" font-family="sans-serif">Chậm (resolve path)</text>
+<text font-size="11" x="570" y="467" text-anchor="middle" fill="#0F6E56" font-family="sans-serif">Nhanh nhất</text>
+
+<!-- Row 4 -->
+<rect x="20" y="478" width="640" height="30" rx="0" fill="#ffffff" stroke="#888780" stroke-width="0.3"/>
+<text font-size="11" x="35" y="497" fill="#444441" font-family="sans-serif">Dùng khi nào</text>
+<text font-size="11" x="290" y="497" text-anchor="middle" fill="#185FA5" font-family="sans-serif">Cần info file đích</text>
+<text font-size="11" x="430" y="497" text-anchor="middle" fill="#534AB7" font-family="sans-serif">Cần info symlink</text>
+<text font-size="11" x="570" y="497" text-anchor="middle" fill="#0F6E56" font-family="sans-serif">Đã có fd rồi</text>
+
+<!-- Row 5 -->
+<rect x="20" y="508" width="640" height="30" rx="0" fill="#F1EFE8" stroke="#888780" stroke-width="0.3"/>
+<text font-size="11" x="35" y="527" fill="#444441" font-family="sans-serif">Embedded Linux example</text>
+<text font-size="11" x="290" y="527" text-anchor="middle" fill="#185FA5" font-family="sans-serif">Check /dev/serial0 là UART?</text>
+<text font-size="11" x="430" y="527" text-anchor="middle" fill="#534AB7" font-family="sans-serif">Check symlink tồn tại?</text>
+<text font-size="11" x="570" y="527" text-anchor="middle" fill="#0F6E56" font-family="sans-serif">Monitor file đang mở</text>
+
+<!-- Divider lines -->
+<line x1="220" y1="358" x2="220" y2="538" stroke="#888780" stroke-width="0.5"/>
+<line x1="360" y1="358" x2="360" y2="538" stroke="#888780" stroke-width="0.5"/>
+<line x1="500" y1="358" x2="500" y2="538" stroke="#888780" stroke-width="0.5"/>
+
+<rect x="20" y="538" width="640" height="22" rx="0" fill="none" stroke="#888780" stroke-width="0.5"/>
+<text font-size="10" x="340" y="553" text-anchor="middle" fill="#888780" font-family="sans-serif">Cả 3 đều trả về struct stat — chỉ khác ở cách chỉ định file và cách xử lý symlink</text>
+
+</svg>
