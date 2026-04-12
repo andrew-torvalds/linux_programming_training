@@ -1,0 +1,82 @@
+<svg width="100%" viewBox="0 0 680 480" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<text font-size="15" font-weight="500" x="340" y="28" text-anchor="middle" fill="#2C2C2A" font-family="sans-serif">fflush() vs fsync() — Flush data xuống disk</text>
+
+<!-- ===== LEFT SIDE: fflush() ===== -->
+<text font-size="13" font-weight="500" x="160" y="55" text-anchor="middle" fill="#185FA5" font-family="sans-serif">fflush(fp)</text>
+<text font-size="10" x="160" y="70" text-anchor="middle" fill="#378ADD" font-family="sans-serif">flush stdio buffer → kernel</text>
+
+<!-- stdio buffer -->
+<rect x="60" y="82" width="200" height="60" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="1"/>
+<text font-size="12" font-weight="500" x="160" y="105" text-anchor="middle" fill="#633806" font-family="sans-serif">stdio buffer</text>
+<text font-size="10" x="160" y="123" text-anchor="middle" fill="#854F0B" font-family="sans-serif">"Hello" — user space RAM</text>
+
+<!-- Arrow fflush -->
+<line x1="160" y1="142" x2="160" y2="182" stroke="#185FA5" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="90" y="150" width="140" height="24" rx="4" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+<text font-size="11" font-weight="500" x="160" y="167" text-anchor="middle" fill="#0C447C" font-family="sans-serif">fflush(fp) ←</text>
+
+<!-- Kernel buffer after fflush -->
+<rect x="60" y="185" width="200" height="60" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="1"/>
+<text font-size="12" font-weight="500" x="160" y="208" text-anchor="middle" fill="#26215C" font-family="sans-serif">Kernel buffer cache</text>
+<text font-size="10" x="160" y="226" text-anchor="middle" fill="#534AB7" font-family="sans-serif">"Hello" — kernel RAM</text>
+
+<!-- Arrow to disk (dashed - not yet) -->
+<line x1="160" y1="245" x2="160" y2="285" stroke="#D3D1C7" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow)"/>
+<text font-size="10" x="220" y="270" fill="#888780" font-family="sans-serif">chưa xuống disk!</text>
+
+<!-- Disk fflush -->
+<rect x="60" y="288" width="200" height="44" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
+<text font-size="12" x="160" y="315" text-anchor="middle" fill="#5F5E5A" font-family="sans-serif">Disk — chưa chắc!</text>
+
+<!-- Status fflush -->
+<rect x="60" y="348" width="200" height="50" rx="8" fill="#FCEBEB" stroke="#E24B4A" stroke-width="0.5"/>
+<text font-size="11" font-weight="500" x="160" y="368" text-anchor="middle" fill="#A32D2D" font-family="sans-serif">Sau fflush():</text>
+<text font-size="10" x="160" y="386" text-anchor="middle" fill="#791F1F" font-family="sans-serif">Mất điện → data MẤT! ❌</text>
+
+<!-- ===== DIVIDER ===== -->
+<line x1="340" y1="50" x2="340" y2="430" stroke="#D3D1C7" stroke-width="1" stroke-dasharray="5 3"/>
+
+<!-- ===== RIGHT SIDE: fsync() ===== -->
+<text font-size="13" font-weight="500" x="510" y="55" text-anchor="middle" fill="#0F6E56" font-family="sans-serif">fflush(fp) + fsync(fileno(fp))</text>
+<text font-size="10" x="510" y="70" text-anchor="middle" fill="#1D9E75" font-family="sans-serif">flush hoàn toàn xuống disk</text>
+
+<!-- stdio buffer fsync -->
+<rect x="410" y="82" width="200" height="60" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="1"/>
+<text font-size="12" font-weight="500" x="510" y="105" text-anchor="middle" fill="#633806" font-family="sans-serif">stdio buffer</text>
+<text font-size="10" x="510" y="123" text-anchor="middle" fill="#854F0B" font-family="sans-serif">"Hello" — user space RAM</text>
+
+<!-- Arrow fflush step -->
+<line x1="510" y1="142" x2="510" y2="182" stroke="#185FA5" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="440" y="150" width="140" height="24" rx="4" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+<text font-size="11" font-weight="500" x="510" y="167" text-anchor="middle" fill="#0C447C" font-family="sans-serif">① fflush(fp)</text>
+
+<!-- Kernel buffer fsync -->
+<rect x="410" y="185" width="200" height="60" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="1"/>
+<text font-size="12" font-weight="500" x="510" y="208" text-anchor="middle" fill="#26215C" font-family="sans-serif">Kernel buffer cache</text>
+<text font-size="10" x="510" y="226" text-anchor="middle" fill="#534AB7" font-family="sans-serif">"Hello" — kernel RAM</text>
+
+<!-- Arrow fsync step -->
+<line x1="510" y1="245" x2="510" y2="285" stroke="#0F6E56" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="440" y="253" width="140" height="24" rx="4" fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.5"/>
+<text font-size="11" font-weight="500" x="510" y="270" text-anchor="middle" fill="#04342C" font-family="sans-serif">② fsync(fileno(fp))</text>
+
+<!-- Disk fsync -->
+<rect x="410" y="288" width="200" height="44" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1"/>
+<text font-size="12" font-weight="500" x="510" y="315" text-anchor="middle" fill="#04342C" font-family="sans-serif">Disk — an toàn ✅</text>
+
+<!-- Status fsync -->
+<rect x="410" y="348" width="200" height="50" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.5"/>
+<text font-size="11" font-weight="500" x="510" y="368" text-anchor="middle" fill="#085041" font-family="sans-serif">Sau fflush() + fsync():</text>
+<text font-size="10" x="510" y="386" text-anchor="middle" fill="#0F6E56" font-family="sans-serif">Mất điện → data AN TOÀN! ✅</text>
+
+<!-- Bottom note -->
+<rect x="40" y="418" width="600" height="50" rx="8" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 2"/>
+<text font-size="11" font-weight="500" x="340" y="438" text-anchor="middle" fill="#2C2C2A" font-family="sans-serif">Lý do cần gọi cả 2:</text>
+<text font-size="10" x="340" y="458" text-anchor="middle" fill="#444441" font-family="sans-serif">fflush() không biết kernel buffer | fsync() không biết stdio buffer</text>
+</svg>
