@@ -263,6 +263,14 @@ close(fd);       // open count = 0 → file tự xóa hoàn toàn!
 
 ## 8. open()
 
+> **Khái niệm:** Mở file và nhận về một file descriptor. Là điểm khởi đầu của mọi thao tác I/O — tạo entry trong open file table (tầng 2) và fd trong fd table (tầng 1).
+
+> **Lưu ý:**
+> - Luôn check return value — nếu -1 thì fd không hợp lệ, đừng dùng tiếp
+> - Flags phải có 1 trong 3: `O_RDONLY`, `O_WRONLY`, `O_RDWR`
+> - Mode chỉ có ý nghĩa khi dùng `O_CREAT` — nhớ prefix `0` (octal)
+> - Mỗi `open()` phải có `close()` tương ứng — tránh fd leak
+
 ```c
 int open(const char *pathname, int flags, mode_t mode);
 // Returns fd on success, -1 on error
@@ -296,6 +304,15 @@ Process A: atomic(seek đến cuối + write) — không thể bị interrupt
 
 ## 9. read()
 
+> **Khái niệm:** Đọc data từ fd vào buffer, bắt đầu từ offset hiện tại trong open file table (tầng 2). Sau khi đọc, offset tự động tăng lên đúng số bytes đã đọc.
+
+> **Lưu ý:**
+> - **Blocking behavior:** Device/socket/pipe → block chờ data. Regular file → return 0 (EOF) ngay
+> - **Partial read:** Return value có thể < count — phải loop để đọc đủ
+> - Return 0 = EOF (hết file), không phải lỗi
+> - Return -1 = lỗi, check errno
+> - Với `O_NONBLOCK`: return -1 và errno=EAGAIN nếu không có data
+
 ```c
 ssize_t read(int fd, void *buf, size_t count);
 // Returns: số bytes đọc, 0 = EOF, -1 = lỗi
@@ -319,6 +336,14 @@ read(fd, buf, 5) → return 0 (EOF)
 
 ## 10. lseek()
 
+> **Khái niệm:** Di chuyển file offset trong open file table (tầng 2) đến vị trí bất kỳ mà không đọc/ghi data. Cho phép đọc/ghi tại vị trí tùy ý thay vì chỉ tuần tự.
+
+> **Lưu ý:**
+> - Chỉ thay đổi tầng 2 (open file table) — không động đến disk
+> - `lseek(fd, 0, SEEK_CUR)` để lấy offset hiện tại mà không di chuyển
+> - Vượt qua cuối file KHÔNG báo lỗi — tạo file hole khi ghi
+> - Không dùng được với pipe và socket — không có offset
+
 ```c
 off_t lseek(int fd, off_t offset, int whence);
 // Returns: offset mới, -1 = lỗi
@@ -338,6 +363,15 @@ off_t lseek(int fd, off_t offset, int whence);
 
 ## 11. write()
 
+> **Khái niệm:** Ghi data từ buffer vào fd, bắt đầu từ offset hiện tại. Data được ghi vào kernel buffer cache trước — KHÔNG xuống disk ngay.
+
+> **Lưu ý:**
+> - Return ngay lập tức — không chờ disk
+> - **Partial write:** Return value có thể < count — phải loop để ghi đủ
+> - Data vẫn trong RAM cho đến khi kernel flush — mất điện = mất data
+> - Dùng `fsync()` sau `write()` nếu cần đảm bảo xuống disk
+> - Với `O_APPEND`: atomic seek-to-end + write — tránh race condition
+
 ```c
 ssize_t write(int fd, const void *buf, size_t count);
 // Returns: số bytes đã ghi, -1 = lỗi
@@ -349,6 +383,15 @@ ssize_t write(int fd, const void *buf, size_t count);
 ---
 
 ## 12. close() và fd leak
+
+> **Khái niệm:** Đóng fd, xóa entry trong open file table (tầng 2) và giải phóng fd trong fd table (tầng 1). KHÔNG đảm bảo data xuống disk.
+
+> **Lưu ý:**
+> - Luôn check return value — lỗi = data có thể chưa được flush
+> - KHÔNG flush data xuống disk — dùng `fsync()` trước nếu cần
+> - Gọi `close()` đúng 1 lần — gọi lần 2 là undefined behavior
+> - Process kết thúc → kernel tự đóng tất cả fd còn lại
+> - fd bị đóng sẽ được tái sử dụng cho `open()` tiếp theo
 
 ```c
 int close(int fd);
@@ -525,10 +568,21 @@ write(fd, data, size);  // mỗi write() tự flush xuống disk luôn!
 
 ## 14. stat(), lstat(), fstat()
 
+> **Khái niệm:** Lấy thông tin metadata của file từ inode (type, size, permissions, timestamps, ownership...). Không cần quyền đọc file — chỉ cần execute permission trên các directory trong path.
+
+> **Lưu ý từng variant:**
+> - `stat()` — dùng pathname, **follow symlink** → trả về info của file đích
+> - `lstat()` — dùng pathname, **dừng tại symlink** → trả về info của symlink chính nó
+> - `fstat()` — dùng fd đã mở, **nhanh nhất** vì không cần resolve pathname lại
+> - `st_size` chỉ có ý nghĩa với regular file — với device file luôn = 0!
+> - `st_ctime` ≠ creation time — là "status change time" (permissions, ownership...)
+> - Luôn kiểm tra `S_ISCHR()`, `S_ISREG()`... trước khi dùng `st_size`
+
 ```c
 int stat(const char *pathname, struct stat *statbuf);   // follow symlink
 int lstat(const char *pathname, struct stat *statbuf);  // dừng tại symlink
 int fstat(int fd, struct stat *statbuf);                // dùng fd
+// All return: 0 on success, -1 on error
 ```
 
 **struct stat — các fields quan trọng:**
@@ -641,9 +695,19 @@ umask 027      # đặt umask an toàn hơn cho embedded
 
 ## 16. dup() và dup2()
 
+> **Khái niệm:** Nhân bản file descriptor — tạo fd mới trỏ đến cùng open file entry (tầng 2). 2 fd share cùng offset và flags. Dùng chủ yếu để redirect stdin/stdout/stderr.
+
+> **Lưu ý:**
+> - Cả 2 fd sau khi dup đều phải được `close()` riêng
+> - `dup2(oldfd, newfd)`: nếu newfd đang mở, tự động close trước khi dup
+> - `dup2(oldfd, oldfd)`: không làm gì nếu oldfd == newfd
+> - Sau khi dup2 redirect stdout, `printf()` sẽ ghi vào file mà không biết
+> - Pattern: `dup()` để backup, `dup2()` để redirect, `dup2()` để restore
+
 ```c
 int dup(int oldfd);              // kernel chọn fd nhỏ nhất available
-int dup2(int oldfd, int newfd);  // dùng đúng fd=newfd
+int dup2(int oldfd, int newfd);  // dùng đúng newfd, close newfd cũ nếu cần
+// Returns: new fd on success, -1 on error
 ```
 
 **Tác động lên 3 tầng bảng:**
@@ -681,8 +745,17 @@ printf("Ghi ra terminal!\n");
 
 ## 17. fcntl()
 
+> **Khái niệm:** Kiểm soát và thay đổi behavior của fd đang mở mà không cần close/open lại. Thay đổi flags trong open file table (tầng 2) hoặc fd table (tầng 1).
+
+> **Lưu ý:**
+> - Luôn dùng pattern **get → modify → set** — không set thẳng sẽ ghi đè flags cũ
+> - `F_SETFL` chỉ thay đổi được một số flags — không thay đổi được `O_RDONLY/O_WRONLY/O_RDWR`
+> - `O_NONBLOCK` với device/socket: return -1 và errno=EAGAIN khi không có data
+> - `O_NONBLOCK` với regular file: không có tác dụng — regular file không bao giờ block
+
 ```c
 int fcntl(int fd, int cmd, ... /* arg */);
+// Returns: phụ thuộc cmd, -1 nếu lỗi
 ```
 
 **F_GETFL / F_SETFL — thay đổi flags sau khi open:**
@@ -719,11 +792,26 @@ fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 
 ## 18. File Locking
 
+> **Khái niệm:** Cơ chế đồng bộ hóa giữa các process khi cùng truy cập một file — tránh race condition khi nhiều process đọc/ghi cùng lúc.
+
+> **Lưu ý chung:**
+> - File locking là **advisory** (tự nguyện) — process không dùng lock vẫn có thể ghi đè
+> - Process crash → kernel tự động unlock khi fd bị đóng
+> - Deadlock có thể xảy ra nếu 2 process lock chéo nhau
+
 ### flock() — Lock toàn bộ file
+
+> **Khái niệm:** Lock toàn bộ file — đơn giản, dùng cho config file, lock file, đảm bảo chỉ 1 instance chạy.
+
+> **Lưu ý:**
+> - `LOCK_NB`: không block — return -1 và errno=EWOULDBLOCK nếu không lock được
+> - Nhiều `LOCK_SH` có thể tồn tại cùng lúc — chỉ `LOCK_EX` mới exclusive
+> - `close()` tự động unlock — không cần gọi `LOCK_UN` tường minh
 
 ```c
 #include <sys/file.h>
 int flock(int fd, int operation);
+// Returns: 0 on success, -1 on error
 ```
 
 | Operation | Ý nghĩa |
@@ -751,17 +839,25 @@ close(fd);           // hoặc close() tự động unlock
 
 ### fcntl() Record Locking — Lock từng vùng bytes
 
+> **Khái niệm:** Lock từng vùng bytes cụ thể trong file — nhiều process có thể làm việc trên các vùng khác nhau của cùng 1 file mà không block nhau.
+
+> **Lưu ý:**
+> - `F_SETLK`: nonblocking — return -1 nếu không lock được
+> - `F_SETLKW`: blocking — **W**ait cho đến khi lock được
+> - `F_GETLK`: chỉ kiểm tra, không thực sự lock
+> - `l_len = 0`: lock từ `l_start` đến cuối file
+> - Unlock bằng cách set `l_type = F_UNLCK`
+
 ```c
 struct flock fl = {
     .l_type   = F_WRLCK,    // F_RDLCK, F_WRLCK, F_UNLCK
     .l_whence = SEEK_SET,
-    .l_start  = 0,           // byte bắt đầu
-    .l_len    = 100,         // số bytes (0 = đến cuối file)
+    .l_start  = 0,
+    .l_len    = 100,
 };
-
 fcntl(fd, F_SETLK, &fl);    // nonblocking
-fcntl(fd, F_SETLKW, &fl);   // blocking — W = Wait
-fcntl(fd, F_GETLK, &fl);    // kiểm tra ai đang giữ lock
+fcntl(fd, F_SETLKW, &fl);   // blocking
+fcntl(fd, F_GETLK, &fl);    // kiểm tra
 ```
 
 **Khi nào dùng flock() vs fcntl():**
