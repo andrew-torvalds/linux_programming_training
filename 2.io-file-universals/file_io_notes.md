@@ -709,6 +709,7 @@ int dup(int oldfd);              // kernel chọn fd nhỏ nhất available
 int dup2(int oldfd, int newfd);  // dùng đúng newfd, close newfd cũ nếu cần
 // Returns: new fd on success, -1 on error
 ```
+![3 tầng bảng](images/dup_dup2.svg)
 
 **Tác động lên 3 tầng bảng:**
 
