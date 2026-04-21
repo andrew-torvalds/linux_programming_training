@@ -1,0 +1,51 @@
+<svg width="100%" viewBox="0 0 680 420" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+<text font-size="15" font-weight="500" x="340" y="28" text-anchor="middle" fill="#2C2C2A" font-family="sans-serif">Memory Layout của một Process</text>
+<!-- Address labels -->
+<text font-size="11" x="168" y="58" text-anchor="end" fill="#888780" font-family="sans-serif">địa chỉ cao</text>
+<text font-size="11" x="168" y="388" text-anchor="end" fill="#888780" font-family="sans-serif">địa chỉ thấp</text>
+<line x1="172" y1="45" x2="172" y2="398" stroke="#D3D1C7" stroke-width="0.5"/>
+<line x1="168" y1="45" x2="176" y2="45" stroke="#D3D1C7" stroke-width="0.5"/>
+<line x1="168" y1="398" x2="176" y2="398" stroke="#D3D1C7" stroke-width="0.5"/>
+<!-- Stack -->
+<rect x="180" y="45" width="240" height="60" rx="4" fill="#FAECE7" stroke="#D85A30" stroke-width="0.5"/>
+<text font-size="13" font-weight="500" x="300" y="70" text-anchor="middle" fill="#4A1B0C" font-family="sans-serif">Stack</text>
+<text font-size="10" x="300" y="88" text-anchor="middle" fill="#993C1D" font-family="sans-serif">biến local, function calls — tự động quản lý</text>
+<!-- Stack grows down -->
+<line x1="300" y1="105" x2="300" y2="128" stroke="#D85A30" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text font-size="10" x="435" y="122" fill="#D85A30" font-family="sans-serif">grows ↓</text>
+<!-- Free space -->
+<rect x="180" y="132" width="240" height="50" rx="4" fill="none" stroke="#D3D1C7" stroke-width="0.5" stroke-dasharray="5 3"/>
+<text font-size="11" x="300" y="162" text-anchor="middle" fill="#888780" font-family="sans-serif">free space</text>
+<!-- Heap grows up -->
+<line x1="300" y1="210" x2="300" y2="187" stroke="#0F6E56" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text font-size="10" x="435" y="204" fill="#0F6E56" font-family="sans-serif">grows ↑</text>
+<!-- Heap -->
+<rect x="180" y="214" width="240" height="60" rx="4" fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.5"/>
+<text font-size="13" font-weight="500" x="300" y="239" text-anchor="middle" fill="#04342C" font-family="sans-serif">Heap</text>
+<text font-size="10" x="300" y="257" text-anchor="middle" fill="#085041" font-family="sans-serif">malloc(), dynamic memory — developer quản lý</text>
+<!-- BSS -->
+<rect x="180" y="284" width="240" height="38" rx="4" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.5"/>
+<text font-size="13" font-weight="500" x="300" y="302" text-anchor="middle" fill="#26215C" font-family="sans-serif">BSS</text>
+<text font-size="10" x="300" y="317" text-anchor="middle" fill="#534AB7" font-family="sans-serif">global/static chưa khởi tạo — kernel set = 0</text>
+<!-- Data -->
+<rect x="180" y="330" width="240" height="38" rx="4" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.5"/>
+<text font-size="13" font-weight="500" x="300" y="348" text-anchor="middle" fill="#412402" font-family="sans-serif">Data</text>
+<text font-size="10" x="300" y="363" text-anchor="middle" fill="#633806" font-family="sans-serif">global/static đã khởi tạo — int x = 10;</text>
+<!-- Text -->
+<rect x="180" y="376" width="240" height="38" rx="4" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+<text font-size="13" font-weight="500" x="300" y="394" text-anchor="middle" fill="#042C53" font-family="sans-serif">Text (Code)</text>
+<text font-size="10" x="300" y="407" text-anchor="middle" fill="#185FA5" font-family="sans-serif">code của program — read only</text>
+<!-- Right side examples -->
+<text font-size="11" x="450" y="68" fill="#5F5E5A" font-family="sans-serif">void foo() {</text>
+<text font-size="11" x="450" y="83" fill="#5F5E5A" font-family="sans-serif">  int x = 5; ← đây</text>
+<text font-size="11" x="450" y="98" fill="#5F5E5A" font-family="sans-serif">}</text>
+<text font-size="11" x="450" y="240" fill="#5F5E5A" font-family="sans-serif">malloc(1024);</text>
+<text font-size="11" x="450" y="302" fill="#5F5E5A" font-family="sans-serif">int arr[100]; (global)</text>
+<text font-size="11" x="450" y="348" fill="#5F5E5A" font-family="sans-serif">int x = 10; (global)</text>
+<text font-size="11" x="450" y="394" fill="#5F5E5A" font-family="sans-serif">main(), func()...</text>
+</svg>

@@ -1,0 +1,58 @@
+<svg width="100%" viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+<text font-size="15" font-weight="500" x="340" y="28" text-anchor="middle" fill="#2C2C2A" font-family="sans-serif">fork() + exec() + waitpid() flow</text>
+
+<!-- Process cha before fork -->
+<rect x="240" y="45" width="200" height="50" rx="8" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+<text font-size="12" font-weight="500" x="340" y="66" text-anchor="middle" fill="#0C447C" font-family="sans-serif">Process cha</text>
+<text font-size="11" x="340" y="84" text-anchor="middle" fill="#185FA5" font-family="sans-serif">PID=100, đang chạy</text>
+
+<!-- fork() call -->
+<line x1="340" y1="95" x2="340" y2="120" stroke="#378ADD" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="280" y="120" width="120" height="28" rx="4" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+<text font-size="12" font-weight="500" x="340" y="139" text-anchor="middle" fill="#0C447C" font-family="sans-serif">fork()</text>
+
+<!-- Split into cha and con -->
+<line x1="280" y1="148" x2="160" y2="178" stroke="#378ADD" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="400" y1="148" x2="520" y2="178" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text font-size="10" x="200" y="168" fill="#185FA5" font-family="sans-serif">pid > 0</text>
+<text font-size="10" x="460" y="168" fill="#0F6E56" font-family="sans-serif">pid == 0</text>
+
+<!-- Process cha after fork -->
+<rect x="60" y="178" width="200" height="50" rx="8" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+<text font-size="12" font-weight="500" x="160" y="199" text-anchor="middle" fill="#0C447C" font-family="sans-serif">Process cha</text>
+<text font-size="11" x="160" y="217" text-anchor="middle" fill="#185FA5" font-family="sans-serif">PID=100, chờ con</text>
+
+<!-- Process con after fork -->
+<rect x="420" y="178" width="200" height="50" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.5"/>
+<text font-size="12" font-weight="500" x="520" y="199" text-anchor="middle" fill="#04342C" font-family="sans-serif">Process con</text>
+<text font-size="11" x="520" y="217" text-anchor="middle" fill="#085041" font-family="sans-serif">PID=101, bản copy cha</text>
+
+<!-- waitpid() -->
+<line x1="160" y1="228" x2="160" y2="258" stroke="#378ADD" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="80" y="258" width="160" height="28" rx="4" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+<text font-size="12" font-weight="500" x="160" y="277" text-anchor="middle" fill="#0C447C" font-family="sans-serif">waitpid() — chờ</text>
+
+<!-- exec() -->
+<line x1="520" y1="228" x2="520" y2="258" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="420" y="258" width="200" height="28" rx="4" fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.5"/>
+<text font-size="12" font-weight="500" x="520" y="277" text-anchor="middle" fill="#04342C" font-family="sans-serif">exec("ls") — thay chương trình</text>
+
+<!-- ls runs -->
+<line x1="520" y1="286" x2="520" y2="316" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="420" y="316" width="200" height="28" rx="4" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.5"/>
+<text font-size="12" font-weight="500" x="520" y="335" text-anchor="middle" fill="#412402" font-family="sans-serif">ls chạy → exit(0)</text>
+
+<!-- Con kết thúc → cha nhận -->
+<path d="M420 330 L280 330 L280 286 L240 286" fill="none" stroke="#BA7517" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow)"/>
+<text font-size="10" x="330" y="348" text-anchor="middle" fill="#BA7517" font-family="sans-serif">con kết thúc → cha nhận exit status</text>
+
+<!-- Cha tiếp tục -->
+<line x1="160" y1="286" x2="160" y2="316" stroke="#378ADD" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="60" y="316" width="200" height="28" rx="4" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+<text font-size="12" font-weight="500" x="160" y="335" text-anchor="middle" fill="#0C447C" font-family="sans-serif">Cha tiếp tục chạy</text>
+</svg>
